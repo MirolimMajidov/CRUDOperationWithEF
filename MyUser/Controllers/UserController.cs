@@ -26,7 +26,7 @@ namespace MyUser.Controllers
         [HttpPut]
         public User Put(User user)
         {
-            var _user = _context.Users.FirstOrDefault(u => u.ID == user.ID);
+            var _user = _context.Users.FirstOrDefault(u => u.Id == user.Id);
             if (_user is not null)
             {
                 if (!string.IsNullOrEmpty(user.LastName))
@@ -57,9 +57,9 @@ namespace MyUser.Controllers
         }
 
         [HttpDelete]
-        public User Delete(int userId)
+        public User Delete(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.ID == userId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
             if (user is not null)
             {
                 _context.Users.Remove(user);

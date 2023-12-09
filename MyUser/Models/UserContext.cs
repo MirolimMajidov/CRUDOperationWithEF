@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyUser.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace MyUser.Models
 {
@@ -9,21 +10,44 @@ namespace MyUser.Models
 
         public UserContext(DbContextOptions<UserContext> options) : base(options) { }
 
-        public UserContext()
-        {
-        }
-
         public DbSet<User> Users { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseSqlServer(ConnectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll);
-        }
+        public DbSet<Backpack> Backpacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().Property(u => u.FullName).HasComputedColumnSql($"[{nameof(User.FirstName)}] + ' ' + [{nameof(User.LastName)}]", true);
+            modelBuilder.Ignore<BaseEntity>();
+
+            var users = new List<User>()
+                {
+                    new User(){ FirstName = "Jahonger", LastName = "Ahmedov" },
+                    new User(){ FirstName = "Jake", LastName = "Esh" },
+                    new User(){ FirstName = "Rasul", LastName = "Azimov" },
+                };
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("Users");
+                entity.Property(u => u.FullName).HasComputedColumnSql($"[{nameof(User.FirstName)}] + ' ' + [{nameof(User.LastName)}]", true);
+
+                entity.HasMany(c => c.Backpacks)
+                .WithOne(e => e.User).HasForeignKey(e=>e.UserId).OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasData(users);
+            });
+
+            var firstUser = users.First();
+            var backpacks = new List<Backpack>()
+                {
+                    new Backpack(){ Name = "First", UserId = firstUser.Id },
+                    new Backpack(){ Name = "Second", UserId = firstUser.Id },
+                };
+            modelBuilder.Entity<Backpack>(entity =>
+            {
+                entity.ToTable("Backpacks");
+                entity.HasData(backpacks);
+            });
+
         }
     }
 }
