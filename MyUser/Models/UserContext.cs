@@ -47,7 +47,6 @@ namespace MyUser.Models
                 entity.ToTable("Backpacks");
                 entity.HasData(backpacks);
             });
-
         }
     }
 }
