@@ -1,4 +1,6 @@
-﻿namespace MyUser.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MyUser.Models
 {
     public class User : BaseEntity
     {
@@ -6,6 +8,8 @@
         public string FirstName { get; set; }
         public int Age { get; set; }
         public string FullName { get; }
+
+        [JsonIgnore]
         public ICollection<Backpack> Backpacks { get; set; } = new List<Backpack>();
     }
 }

@@ -21,11 +21,12 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntit
 
     public TEntity GetById(Guid id)
     {
-        return _dbSet.FirstOrDefault(i => i.Id == id);
+        return _dbSet.AsNoTracking().FirstOrDefault(i => i.Id == id);
     }
 
     public void Create(TEntity item)
     {
+        item.Id = Guid.NewGuid();
         _dbSet.Add(item);
         _context.SaveChanges();
     }
