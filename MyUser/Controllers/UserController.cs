@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyUser.Models;
+using MyUser.Services;
 
 namespace MyUser.Controllers
 {
@@ -9,36 +10,24 @@ namespace MyUser.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly UserContext _context;
+        private readonly IEntityRepository<User> _repository;
 
-        public UserController(ILogger<UserController> logger, UserContext context)
+        public UserController(ILogger<UserController> logger, IEntityRepository<User> repository)
         {
             _logger = logger;
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
         public IEnumerable<User> Get()
         {
-            return _context.Users.AsTracking().ToList();
+            return _repository.GetAll().ToList();
         }
 
-        [HttpPut]
-        public User Put(User user)
+        [HttpGet("GetById")]
+        public User GetById(Guid id)
         {
-            var _user = _context.Users.FirstOrDefault(u => u.Id == user.Id);
-            if (_user is not null)
-            {
-                if (!string.IsNullOrEmpty(user.LastName))
-                    _user.LastName = user.LastName;
-
-                if (!string.IsNullOrEmpty(user.FirstName))
-                    _user.FirstName = user.FirstName;
-
-                _context.SaveChanges();
-            }
-
-            return _user;
+            return _repository.GetById(id);
         }
 
         [HttpPost]
@@ -49,24 +38,37 @@ namespace MyUser.Controllers
                 LastName = lastName,
                 FirstName = firstName,
             };
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            _repository.Create(user);
 
             return user;
+        }
+
+        [HttpPut]
+        public User Put(User user)
+        {
+            var _user = _repository.GetById(user.Id);
+            if (_user is not null)
+            {
+                if (!string.IsNullOrEmpty(user.LastName))
+                    _user.LastName = user.LastName;
+
+                if (!string.IsNullOrEmpty(user.FirstName))
+                    _user.FirstName = user.FirstName;
+
+                _repository.Update(_user);
+            }
+
+            return _user;
         }
 
         [HttpDelete]
         public User Delete(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user is not null)
-            {
-                _context.Users.Remove(user);
-                _context.SaveChanges();
-            }
+            var _user = _repository.GetById(userId);
+            if (_user is not null)
+                _repository.Remove(_user);
 
-            return user;
+            return _user;
         }
     }
 }

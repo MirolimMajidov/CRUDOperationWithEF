@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyUser.Models;
+using MyUser.Services;
 
 namespace MyUser
 {
@@ -13,6 +14,8 @@ namespace MyUser
 
             builder.Services.AddDbContext<UserContext>(options =>
        options.UseSqlServer(UserContext.ConnectionString));
+            builder.Services.AddTransient(typeof(IEntityRepository<>), typeof(EntityRepository<>));
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
