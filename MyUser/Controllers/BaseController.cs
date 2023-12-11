@@ -1,3 +1,5 @@
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyUser.Models;
 using MyUser.Services;
@@ -5,6 +7,7 @@ using MyUser.Services;
 namespace MyUser.Controllers
 {
     [ApiController]
+    [Authorize]
     public abstract class BaseController<TEntity> : ControllerBase where TEntity : BaseEntity
     {
         protected readonly ILogger<ControllerBase> _logger;
@@ -17,19 +20,21 @@ namespace MyUser.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IEnumerable<TEntity> Get()
         {
             return _repository.GetAll().ToList();
         }
 
         [HttpGet("GetById")]
+        [AllowAnonymous]
         public TEntity GetById(Guid id)
         {
             return _repository.GetById(id);
         }
 
         [HttpPost]
-        public TEntity Post(TEntity user)
+        public TEntity Create(TEntity user)
         {
             _repository.Create(user);
 
@@ -37,7 +42,7 @@ namespace MyUser.Controllers
         }
 
         [HttpPut]
-        public TEntity Put(TEntity user)
+        public TEntity Update(TEntity user)
         {
             var _user = _repository.GetById(user.Id);
             if (_user is not null)

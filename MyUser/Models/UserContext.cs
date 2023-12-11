@@ -20,9 +20,9 @@ namespace MyUser.Models
 
             var users = new List<User>()
                 {
-                    new User(){ FirstName = "Jahonger", LastName = "Ahmedov" },
-                    new User(){ FirstName = "Jake", LastName = "Esh" },
-                    new User(){ FirstName = "Rasul", LastName = "Azimov" },
+                    new User(){ FirstName = "Jahonger", LastName = "Ahmedov", Username = "User1", Password = "User11" },
+                    new User(){ FirstName = "Jake", LastName = "Esh" , Username = "User2", Password = "User22" },
+                    new User(){ FirstName = "Rasul", LastName = "Azimov" , Username = "User3", Password = "User33" },
                 };
 
             modelBuilder.Entity<User>(entity =>

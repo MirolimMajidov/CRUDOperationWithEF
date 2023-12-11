@@ -9,6 +9,9 @@ namespace MyUser.Models
         public int Age { get; set; }
         public string FullName { get; }
 
+        public string Username { get; set; }
+        public string Password { get; set; }
+
         [JsonIgnore]
         public ICollection<Backpack> Backpacks { get; set; } = new List<Backpack>();
     }
