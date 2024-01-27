@@ -14,32 +14,44 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntit
         _dbSet = context.Set<TEntity>();
     }
 
-    public IEnumerable<TEntity> GetAll()
+    public async Task<IEnumerable<TEntity>> GetAllAsync()
     {
-        return _dbSet.AsNoTracking();
+        return await Task.FromResult(_dbSet.AsNoTracking());
     }
 
-    public TEntity GetById(Guid id)
+    public async Task<TEntity> GetByIdAsync(Guid id)
     {
-        return _dbSet.AsNoTracking().FirstOrDefault(i => i.Id == id);
+        return await _dbSet.FirstOrDefaultAsync(i => i.Id == id);
     }
 
-    public void Create(TEntity item)
+    public async Task<TEntity> CreateAsync(TEntity item)
     {
         item.Id = Guid.NewGuid();
-        _dbSet.Add(item);
-        _context.SaveChanges();
+        await _dbSet.AddAsync(item);
+        await _context.SaveChangesAsync();
+
+        return item;
     }
 
-    public void Update(TEntity item)
+    public async Task<TEntity> UpdateAsync(TEntity item)
     {
         _context.Entry(item).State = EntityState.Modified;
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
+
+        return item;
     }
 
-    public void Remove(TEntity item)
+    public async Task<bool> DeleteAsync(TEntity item)
     {
-        _dbSet.Remove(item);
-        _context.SaveChanges();
+        try
+        {
+            _dbSet.Remove(item);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }
