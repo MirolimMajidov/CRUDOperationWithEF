@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyUser.Models;
+using System.Linq;
 
 namespace MyUser.Services;
 
@@ -14,9 +15,16 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntit
         _dbSet = context.Set<TEntity>();
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    public async Task<IEnumerable<TEntity>> GetAllAsync(int? from, int? size)
     {
-        return await Task.FromResult(_dbSet.AsNoTracking());
+        var items = _dbSet.AsNoTracking();
+        if (from is not null)
+            items = items.Skip((int)from);
+
+        if (size is not null)
+            items = items.Take((int)size);
+
+        return await Task.FromResult(items);
     }
 
     public async Task<TEntity> GetByIdAsync(Guid id)
@@ -33,25 +41,31 @@ public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntit
         return item;
     }
 
-    public async Task<TEntity> UpdateAsync(TEntity item)
+    public async Task<TEntity> UpdateAsync(Guid id, TEntity item)
     {
-        _context.Entry(item).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        var _item = await GetByIdAsync(id);
+        if (_item is not null)
+        {
+            _context.Entry(_item).State = EntityState.Detached;
+            item.Id = id;
+            _context.Entry(item).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return item;
+        }
 
-        return item;
+        return null;
     }
 
-    public async Task<bool> DeleteAsync(TEntity item)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        try
+        var item = await GetByIdAsync(id);
+        if (item is not null)
         {
             _dbSet.Remove(item);
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception)
-        {
-            return false;
-        }
+
+        return false;
     }
 }
